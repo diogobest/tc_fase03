@@ -1,24 +1,86 @@
-import React from "react";
 import styled from "styled-components";
+import { NavLink, useNavigate } from 'react-router-dom'
 
-const HeaderContainer = styled.footer`
+type HeaderProps = {
+  isAuthenticated: boolean
+  onLogout: () => void
+}
+
+const HeaderContainer = styled.header`
   background-color: #ed145b;
   color: white;
-  text-align: center;
-  padding: 10px 0;
-  position: fixed;
-  bottom: 0;
-  width: 100%;
+  padding: 18px 28px;
 `;
 
-const HeaderTitle = styled.h1`
-  text-align: center;
+const HeaderContent = styled.div`
+  align-items: center;
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+  margin: 0 auto;
+  max-width: 1126px;
+
+  @media (max-width: 720px) {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 `
 
-const Header: React.FC = () => {
+const HeaderTitle = styled(NavLink)`
+  color: white;
+  font-size: 24px;
+  font-weight: 700;
+  text-decoration: none;
+`
+
+const HeaderNav = styled.nav`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+
+  a,
+  button {
+    border: 1px solid rgba(255, 255, 255, 0.42);
+    border-radius: 999px;
+    color: white;
+    background: rgba(255, 255, 255, 0.12);
+    cursor: pointer;
+    font: inherit;
+    padding: 8px 12px;
+    text-decoration: none;
+  }
+
+  a.active,
+  a:hover,
+  button:hover {
+    background: white;
+    color: #ed145b;
+  }
+`
+
+const Header = ({ isAuthenticated, onLogout }: HeaderProps) => {
+  const navigate = useNavigate()
+
+  function handleLogout() {
+    onLogout()
+    navigate('/')
+  }
+
   return(
     <HeaderContainer>
-      <HeaderTitle>Lista de Posts </HeaderTitle>
+      <HeaderContent>
+        <HeaderTitle to="/">Lista de Posts</HeaderTitle>
+        <HeaderNav aria-label="Navegação principal">
+          <NavLink to="/">Posts</NavLink>
+          {isAuthenticated && <NavLink to="/posts/new">Criar postagem</NavLink>}
+          {isAuthenticated && <NavLink to="/admin">Administração</NavLink>}
+          {isAuthenticated ? (
+            <button type="button" onClick={handleLogout}>Sair</button>
+          ) : (
+            <NavLink to="/login">Login docente</NavLink>
+          )}
+        </HeaderNav>
+      </HeaderContent>
     </HeaderContainer>
   )
 }

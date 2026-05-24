@@ -1,29 +1,23 @@
 import { useEffect, useState } from 'react'
 import type { Post } from '../../types'
+import styled from "styled-components";
 
 type PostsResponse = Post[] | { posts?: Post[] }
 
-const POSTS_URL = '/api/posts'
+const POSTS_URL = '/api/posts?type=all'
 
-function uniquePosts(posts: Post[]) {
-  const seen = new Set<Post['id']>()
-
-  return posts.filter((post) => {
-    if (seen.has(post.id)) {
-      return false
-    }
-
-    seen.add(post.id)
-    return true
-  })
-}
+const ContentComponent = styled.p`
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 200px;
+`;
 
 const Posts: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([])
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null)
   const [search, setSearch] = useState('')
   const [query, setQuery] = useState('')
-  const [error, setError] = useState('')
-  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -34,17 +28,15 @@ const Posts: React.FC = () => {
   }, [search])
 
   useEffect(() => {
-    const controller = new AbortController()
-
     async function loadPosts() {
       try {
-        setIsLoading(true)
+        setPosts([])
 
         const url = query
           ? `/api/posts/search?${new URLSearchParams({ q: query })}`
           : POSTS_URL
 
-        const response = await fetch(url, { signal: controller.signal })
+        const response = await fetch(url)
 
         if (!response.ok) {
           throw new Error(`Request failed with status ${response.status}`)
@@ -52,22 +44,15 @@ const Posts: React.FC = () => {
 
         const data = (await response.json()) as PostsResponse
         const nextPosts = Array.isArray(data) ? data : data.posts ?? []
-        setPosts(uniquePosts(nextPosts))
-        setError('')
+
+        setSelectedPost(null)
+        setPosts(nextPosts)
       } catch (err) {
-        if (err instanceof Error && err.name !== 'AbortError') {
-          setError(err.message)
-        }
-      } finally {
-        if (!controller.signal.aborted) {
-          setIsLoading(false)
-        }
+        throw new Error('Ocorreu um erro na api.', { cause: err })
       }
     }
 
     loadPosts()
-
-    return () => controller.abort()
   }, [query])
 
   return (
@@ -75,33 +60,43 @@ const Posts: React.FC = () => {
       <header className="posts-header">
         <h1>Posts</h1>
         <label className="search-field">
-          <span>Search posts</span>
+          <span>Filtrar Posts</span>
           <input
             type="search"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Filter by title or content"
+            placeholder="Filtrar por título ou conteúdo"
           />
         </label>
       </header>
 
-      {isLoading && <p className="status">Loading posts...</p>}
-
-      {error && <p className="status status-error">Could not load posts: {error}</p>}
-
-      {!isLoading && !error && posts.length === 0 && (
-        <p className="status">No posts found{query ? ` for "${query}"` : ''}.</p>
+      {selectedPost ? (
+        <article className="post-detail">
+          <button className="back-button" type="button" onClick={() => setSelectedPost(null)}>
+            Voltar
+          </button>
+          <h2>{selectedPost.title}</h2>
+          <p className="post-meta">Autor: {selectedPost.author}</p>
+          <p>{selectedPost.content}</p>
+          <p className="post-meta">Criado em{new Date(selectedPost.created_at).toLocaleString()}</p>
+          <p className="post-meta">Última atualização{new Date(selectedPost.updated_at).toLocaleString()}</p>
+        </article>
+      ) : (
+        <section className="posts-grid" aria-label="Posts list">
+          {posts.map((post) => (
+            <button
+              className="post-card"
+              key={post.id ?? post.title}
+              type="button"
+              onClick={() => setSelectedPost(post)}
+            >
+              <h2>{post.title}</h2>
+              <p>{post.author}</p>
+              <ContentComponent>{post.content}</ContentComponent>
+            </button>
+          ))}
+        </section>
       )}
-
-      {!isLoading && !error && <section className="posts-grid" aria-label="Posts list">
-        {posts.map((post) => (
-          <article className="post-card" key={post.id ?? post.title}>
-            <h2>{post.title }</h2>
-            <p>{post.author}</p>
-            <p>{post.content}</p>
-          </article>
-        ))}
-      </section>}
     </main>
   )
 }
