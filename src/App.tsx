@@ -8,6 +8,7 @@ import Posts from './components/Posts/Posts'
 import AdminPosts from './pages/AdminPosts'
 import Login from './pages/Login'
 import PostForm from './pages/PostForm'
+import type { ProtectedRouteProps } from './types'
 
 const LOCAL_STORAGE_KEY = 'teacher-authenticated'
 
@@ -17,11 +18,6 @@ const AppContent = styled.div`
   flex-direction: column;
   min-height: 100svh;
 `
-
-type ProtectedRouteProps = {
-  isAuthenticated: boolean
-  children: ReactNode
-}
 
 function ProtectedRoute({ isAuthenticated, children }: ProtectedRouteProps) {
   if (!isAuthenticated) {
