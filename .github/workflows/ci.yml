@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - '**'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: [self-hosted, linux, x64]
+    container:
+      image: node:24-bullseye-slim
+
+    services:
+      db:
+        image: postgres
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: install dependencies
+        run: |
+          npm install
+
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy using ssh
+        uses: appleboy/ssh-action@master
+        env:
+          NODE_ENV: production
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.PRIVATE_KEY }}
+          script: |
+            mkdir -p ~/.ssh
+            echo "${{ secrets.GIT_PRIVATE_KEY }}" > ~/.ssh/github
+            eval "$(ssh-agent -s)"
+            chmod 600 ~/.ssh/github
+            ssh-add ~/.ssh/github
+            rm -rf ~/tc_fase03
+            cd ~/
+            git clone git@github.com:diogobest/tc_fase03.git
+            cd tc_fase03
+            docker compose down
+            docker compose run --rm web npm install
+            docker compose up -d

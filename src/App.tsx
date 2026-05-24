@@ -1,5 +1,6 @@
 import { type ReactNode, useState } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import styled from 'styled-components'
 import Header from './components/Header/Header'
 import Footer from './components/Footer/Footer'
 import Main from './components/Main/Main'
@@ -7,9 +8,15 @@ import Posts from './components/Posts/Posts'
 import AdminPosts from './pages/AdminPosts'
 import Login from './pages/Login'
 import PostForm from './pages/PostForm'
-import './App.css'
 
-const AUTH_KEY = 'teacher-authenticated'
+const LOCAL_STORAGE_KEY = 'teacher-authenticated'
+
+const AppContent = styled.div`
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 100svh;
+`
 
 type ProtectedRouteProps = {
   isAuthenticated: boolean
@@ -25,21 +32,21 @@ function ProtectedRoute({ isAuthenticated, children }: ProtectedRouteProps) {
 }
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(() => localStorage.getItem(AUTH_KEY) === 'true')
+  const [isAuthenticated, setIsAuthenticated] = useState(() => Boolean(localStorage.getItem(LOCAL_STORAGE_KEY)))
 
-  function login() {
-    localStorage.setItem(AUTH_KEY, 'true')
+  function login(accessToken: string) {
+    localStorage.setItem(LOCAL_STORAGE_KEY, accessToken)
     setIsAuthenticated(true)
   }
 
   function logout() {
-    localStorage.removeItem(AUTH_KEY)
+    localStorage.removeItem(LOCAL_STORAGE_KEY)
     setIsAuthenticated(false)
   }
 
   return(
     <BrowserRouter>
-      <div className="app-content">
+      <AppContent>
         <Header isAuthenticated={isAuthenticated} onLogout={logout}/>
         <Main>
           <Routes>
@@ -63,7 +70,7 @@ function App() {
           </Routes>
         </Main>
         <Footer/>
-      </div>
+      </AppContent>
     </BrowserRouter>
   )
 }

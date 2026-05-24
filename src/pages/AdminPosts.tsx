@@ -1,6 +1,54 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import styled from 'styled-components'
+import {
+  Actions,
+  DangerButton,
+  Eyebrow,
+  PagePanel,
+  PrimaryLink,
+  SecondaryLink,
+  Status,
+} from '../components/ui'
 import type { Post } from '../types'
+
+const PageTitleRow = styled.div`
+  align-items: center;
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+  margin-bottom: 28px;
+
+  @media (max-width: 640px) {
+    align-items: stretch;
+    flex-direction: column;
+  }
+`
+
+const AdminList = styled.div`
+  display: grid;
+  gap: 14px;
+`
+
+const AdminRow = styled.article`
+  align-items: center;
+  display: flex;
+  gap: 18px;
+  justify-content: space-between;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--bg);
+  box-shadow: var(--shadow);
+
+  h2 {
+    margin-bottom: 6px;
+  }
+
+  @media (max-width: 640px) {
+    align-items: stretch;
+    flex-direction: column;
+  }
+`
 
 function AdminPosts() {
   const [posts, setPosts] = useState<Post[]>([])
@@ -50,39 +98,39 @@ function AdminPosts() {
   }
 
   return (
-    <section className="page-panel admin-page">
-      <div className="page-title-row">
+    <PagePanel>
+      <PageTitleRow>
         <div>
-          <p className="eyebrow">Administração</p>
+          <Eyebrow>Administração</Eyebrow>
           <h1>Gerenciar postagens</h1>
         </div>
-        <Link className="primary-link" to="/posts/new">Criar postagem</Link>
-      </div>
+        <PrimaryLink to="/posts/new">Criar postagem</PrimaryLink>
+      </PageTitleRow>
 
-      {isLoading && <p className="status">Carregando postagens...</p>}
-      {error && <p className="status status-error">{error}</p>}
+      {isLoading && <Status>Carregando postagens...</Status>}
+      {error && <Status $error>{error}</Status>}
 
-      {!isLoading && !error && posts.length === 0 && <p className="status">Nenhuma postagem cadastrada.</p>}
+      {!isLoading && !error && posts.length === 0 && <Status>Nenhuma postagem cadastrada.</Status>}
 
       {!isLoading && posts.length > 0 && (
-        <div className="admin-list">
+        <AdminList>
           {posts.map((post) => (
-            <article className="admin-row" key={post.id}>
+            <AdminRow key={post.id}>
               <div>
                 <h2>{post.title}</h2>
                 <p>{post.author}</p>
               </div>
-              <div className="admin-actions">
-                <Link className="secondary-link" to={`/posts/${post.id}/edit`}>Editar</Link>
-                <button className="danger-button" type="button" onClick={() => void deletePost(post)}>
+              <Actions>
+                <SecondaryLink to={`/posts/${post.id}/edit`}>Editar</SecondaryLink>
+                <DangerButton type="button" onClick={() => void deletePost(post)}>
                   Excluir
-                </button>
-              </div>
-            </article>
+                </DangerButton>
+              </Actions>
+            </AdminRow>
           ))}
-        </div>
+        </AdminList>
       )}
-    </section>
+    </PagePanel>
   )
 }
 

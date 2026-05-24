@@ -1,5 +1,15 @@
 import { type FormEvent, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import {
+  Actions,
+  Eyebrow,
+  FormField,
+  PagePanel,
+  PostFormContainer,
+  PrimaryButton,
+  SecondaryButton,
+  Status,
+} from '../components/ui'
 import type { Post } from '../types'
 
 type PostFormProps = {
@@ -86,16 +96,16 @@ function PostForm({ mode }: PostFormProps) {
   }
 
   return (
-    <section className="page-panel">
-      <p className="eyebrow">{mode === 'edit' ? 'Edição' : 'Criação'}</p>
+    <PagePanel>
+      <Eyebrow>{mode === 'edit' ? 'Edição' : 'Criação'}</Eyebrow>
       <h1>{mode === 'edit' ? 'Editar postagem' : 'Criar postagem'}</h1>
       <p>{mode === 'edit' ? 'Altere os dados atuais da postagem.' : 'Preencha os dados para publicar uma nova postagem.'}</p>
 
       {isLoading ? (
-        <p className="status">Carregando postagem...</p>
+        <Status>Carregando postagem...</Status>
       ) : (
-        <form className="post-form" onSubmit={handleSubmit}>
-          <label>
+        <PostFormContainer onSubmit={handleSubmit}>
+          <FormField>
             <span>Título</span>
             <input
               type="text"
@@ -103,9 +113,9 @@ function PostForm({ mode }: PostFormProps) {
               onChange={(event) => setPayload({ ...payload, title: event.target.value })}
               placeholder="Título da postagem"
             />
-          </label>
+          </FormField>
 
-          <label>
+          <FormField>
             <span>Conteúdo</span>
             <textarea
               value={payload.content}
@@ -113,9 +123,9 @@ function PostForm({ mode }: PostFormProps) {
               placeholder="Conteúdo da postagem"
               rows={8}
             />
-          </label>
+          </FormField>
 
-          <label>
+          <FormField>
             <span>Autor</span>
             <input
               type="text"
@@ -123,21 +133,21 @@ function PostForm({ mode }: PostFormProps) {
               onChange={(event) => setPayload({ ...payload, author: event.target.value })}
               placeholder="Nome do(a) docente"
             />
-          </label>
+          </FormField>
 
-          {error && <p className="status status-error">{error}</p>}
+          {error && <Status $error>{error}</Status>}
 
-          <div className="form-actions">
-            <button className="primary-button" type="submit" disabled={isSubmitting}>
+          <Actions>
+            <PrimaryButton type="submit" disabled={isSubmitting}>
               {isSubmitting ? 'Salvando...' : 'Salvar postagem'}
-            </button>
-            <button className="secondary-button" type="button" onClick={() => navigate('/admin')}>
+            </PrimaryButton>
+            <SecondaryButton type="button" onClick={() => navigate('/admin')}>
               Cancelar
-            </button>
-          </div>
-        </form>
+            </SecondaryButton>
+          </Actions>
+        </PostFormContainer>
       )}
-    </section>
+    </PagePanel>
   )
 }
 
