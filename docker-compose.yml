@@ -1,0 +1,16 @@
+services:
+  web:
+    image: node:24
+    working_dir: /app
+    ports:
+      - "3031:3031"
+    volumes:
+      - .:/app
+    command: npm run dev
+    networks:
+      - frontend
+
+networks:
+  frontend:
+    external: true
+    name: fiap_front

@@ -10,6 +10,33 @@
   text-align: center;
 }
 
+.search-field {
+  display: grid;
+  gap: 8px;
+  max-width: 520px;
+  margin: 24px auto 0;
+  color: var(--text-h);
+  font-size: 15px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.search-field input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text-h);
+  background: var(--bg);
+  font: inherit;
+}
+
+.search-field input:focus {
+  border-color: var(--accent-border);
+  outline: 3px solid var(--accent-bg);
+}
+
 .eyebrow {
   color: var(--accent);
   font-size: 14px;
